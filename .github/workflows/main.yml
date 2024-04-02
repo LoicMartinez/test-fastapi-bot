@@ -1,21 +1,17 @@
 name: CI
 on: push
 jobs:
-  build:
+  linting:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install poetry
-        run: curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/poetry python && \
-          cd /usr/local/bin && \
-          ln -s /opt/poetry/bin/poetry && \
-          poetry config virtualenvs.create false
-      - name: Install dependencies
-        run: bash -c poetry install --no-root --only main
-      # Update output format to enable automatic inline annotations.
-      - name: Run Ruff
-        run: ruff check --output-format=github .
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip
+          restore-keys: ${{ runner.os }}-pip
+      - run: python -m pip install black flake8 isort
+      - run: ruff check --output-format=github
